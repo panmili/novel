@@ -117,6 +117,7 @@ class WapIsHuQuGeLa {
         final novelList = NovelList.fromJson(map);
         novelList.readFun = ((Function cb)async{
           String str = await read({"id":item.id,"page":novelList.link});
+          print(str);
           cb(str);
         });
         allList.add(novelList);
