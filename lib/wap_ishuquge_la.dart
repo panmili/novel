@@ -115,8 +115,9 @@ class WapIsHuQuGeLa {
         map['title'] = a.text;
         map['link'] = a.attributes['href']!;
         final novelList = NovelList.fromJson(map);
-        novelList.readFun = (()async =>{
-          await read({"id":item.id,"page":novelList.link})
+        novelList.readFun = ((Function cb)async{
+          String str = await read({"id":item.id,"page":novelList.link});
+          cb(str);
         });
         allList.add(novelList);
       }
