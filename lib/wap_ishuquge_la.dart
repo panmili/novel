@@ -71,7 +71,10 @@ class WapIsHuQuGeLa {
       map['id'] = href.replaceAll(RegExp(r'[^0-9]'), '');
       final search = SearchEntity.fromJson(map);
       search.key = 'ishuquge';
-      search.detailFun = (()async => await detail(search));
+      search.detailFun = ((Function cb)async {
+        SearchEntity s = await detail(search);
+        cb(s);
+      });
       novelList.add(search);
     }
     return novelList;
