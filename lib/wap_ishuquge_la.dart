@@ -8,12 +8,20 @@ import 'api/api_util.dart';
 void main() {
   WapIsHuQuGeLa.search("深空彼岸").then((value) {
     value.forEach((e) async {
-      SearchEntity a = await e.detailFun!();
-      // a.novelList?.forEach((element)async {
-      //    await element.readFun!();
-      // });
-      int aa = a.novelList!.length;
-      a.novelList?[aa-2].readFun!();
+      e.detailFun!((a){
+        int aa = a.novelList!.length;
+        a.novelList?[aa-2].readFun!((ReadDetail b){
+          // print(b.text);
+          b.nextFun!((ReadDetail c){
+            print("下一章");
+            print(c.text);
+          });
+          b.lastFun!((ReadDetail d){
+            print("上一章");
+            print(d.text);
+          });
+        });
+      });
     });
   });
 
@@ -119,7 +127,7 @@ class WapIsHuQuGeLa {
         map['link'] = a.attributes['href']!;
         final novelList = NovelList.fromJson(map);
         novelList.readFun = ((Function cb)async{
-          String str = await read({"id":item.id,"page":novelList.link});
+          ReadDetail str = await read({"id":item.id,"page":novelList.link});
           cb(str);
         });
         allList.add(novelList);
@@ -129,23 +137,27 @@ class WapIsHuQuGeLa {
     return item;
   }
 
-  static Future<String> read(item) async {
+  static Future<ReadDetail> read(item) async {
     String url = 'https://www.ishuquge.la/txt/${item['id']}/${item['page']}';
     Response response = await dio.get(url);
     Document document = parse(response.data);
     Element content = document.getElementById("content")!;
     content.children.first.remove();
-    print(content.text
-        .replaceAll(RegExp(r'\n'), '')
-        .replaceAll(" ", "")
-        .replaceAll(' ', '')
-        .split('https://www.ishuquge')[0]
-        .trim());
-    return content.text
+    final readDetail = ReadDetail();
+    String text = content.text
         .replaceAll(RegExp(r'\n'), '')
         .replaceAll(" ", "")
         .replaceAll(' ', '')
         .split('https://www.ishuquge')[0]
         .trim();
+    readDetail.text = text;
+    List<Element> elements = document.getElementsByClassName("page_chapter").first.getElementsByTagName("a");
+    readDetail.lastFun = (Function cb) async{
+      cb(await read({"id":item['id'],"page":elements.first.attributes['href']}));
+    };
+    readDetail.nextFun = (Function cb) async{
+      cb(await read({"id":item['id'],"page":elements.last.attributes['href']}));
+    };
+    return readDetail;
   }
 }

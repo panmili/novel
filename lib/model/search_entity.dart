@@ -89,4 +89,17 @@ class NovelList {
 
 }
 
+class ReadDetail {
+	Function? lastFun;
+	Function? nextFun;
+	String? text;
+
+	ReadDetail({this.lastFun,this.nextFun,this.text});
+
+	ReadDetail.fromJSon(Map<String, dynamic> json){
+		lastFun = json['lastFun'];
+		nextFun = json['nextFun'];
+		text = json['text'];
+	}
+}
 
